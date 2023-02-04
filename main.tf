@@ -12,11 +12,12 @@ data "aws_ami" "latest_amazon_linux" {
 }
 
 resource "aws_instance" "ec2" {
-  ami             = data.aws_ami.latest_amazon_linux.id
-  subnet_id       = aws_default_subnet.default_subnet.id
-  instance_type   = "t3.micro"
-  key_name        = aws_key_pair.key_pair.key_name
-  security_groups = [aws_security_group.sg.id]
+  ami                  = data.aws_ami.latest_amazon_linux.id
+  subnet_id            = aws_default_subnet.default_subnet.id
+  instance_type        = "t3.micro"
+  iam_instance_profile = "LabInstanceProfile"
+  key_name             = aws_key_pair.key_pair.key_name
+  security_groups      = [aws_security_group.sg.id]
   tags = {
     Name = "ec2_assignment1"
   }
@@ -79,4 +80,12 @@ resource "aws_security_group" "sg" {
   tags = {
     Name = "sg_assignment1"
   }
+}
+
+resource "aws_ecr_repository" "db_repo" {
+  name = "my_db"
+}
+
+resource "aws_ecr_repository" "app_repo" {
+  name = "my_app"
 }
