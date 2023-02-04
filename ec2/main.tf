@@ -2,28 +2,21 @@ provider "aws" {
   region = "us-east-1"
 }
 
-data "aws_ami" "ubuntu" {
+data "aws_ami" "latest_amazon_linux" {
+  owners      = ["amazon"]
   most_recent = true
-
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
   }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["099720109477"] # Canonical
 }
 
 resource "aws_instance" "ec2" {
-  ami               = data.aws_ami.ubuntu.id
-  subnet_id = aws_default_subnet.default_subnet.id
-  instance_type     = "t3.micro"
-  key_name          = aws_key_pair.key_pair.key_name
-  security_groups   = [aws_security_group.sg.id]
+  ami             = data.aws_ami.latest_amazon_linux.id
+  subnet_id       = aws_default_subnet.default_subnet.id
+  instance_type   = "t3.micro"
+  key_name        = aws_key_pair.key_pair.key_name
+  security_groups = [aws_security_group.sg.id]
   tags = {
     Name = "ec2_assignment1"
   }
