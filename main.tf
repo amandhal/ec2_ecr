@@ -1,7 +1,9 @@
+# Provider
 provider "aws" {
   region = "us-east-1"
 }
 
+# AMI
 data "aws_ami" "latest_amazon_linux" {
   owners      = ["amazon"]
   most_recent = true
@@ -11,6 +13,7 @@ data "aws_ami" "latest_amazon_linux" {
   }
 }
 
+# EC2 instance
 resource "aws_instance" "ec2" {
   ami                  = data.aws_ami.latest_amazon_linux.id
   subnet_id            = aws_default_subnet.default_subnet.id
@@ -18,32 +21,34 @@ resource "aws_instance" "ec2" {
   iam_instance_profile = "LabInstanceProfile"
   key_name             = aws_key_pair.key_pair.key_name
   security_groups      = [aws_security_group.sg.id]
+  user_data            = <<EOF
+  #! /bin/bash
+  sudo yum update -y
+  sudo yum install docker -y
+  sudo systemctl start docker
+  sudo systemctl enable docker
+  sudo usermod -a -G docker ec2-user
+EOF
   tags = {
     Name = "ec2_assignment1"
   }
 }
 
+# Default subnet
 resource "aws_default_subnet" "default_subnet" {
   availability_zone = "us-east-1b"
 }
 
+# SSH key pair 
 resource "aws_key_pair" "key_pair" {
   key_name   = "id_rsa"
   public_key = file("/home/ec2-user/.ssh/id_rsa.pub")
 }
 
+# Security Group
 resource "aws_security_group" "sg" {
   ingress {
-    description      = "8080 from everywhere"
-    from_port        = 8080
-    to_port          = 8080
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  ingress {
-    description      = "8081from everywhere"
+    description      = "8081 from everywhere"
     from_port        = 8081
     to_port          = 8081
     protocol         = "tcp"
@@ -55,6 +60,15 @@ resource "aws_security_group" "sg" {
     description      = "8082 from everywhere"
     from_port        = 8082
     to_port          = 8082
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  ingress {
+    description      = "8083 from everywhere"
+    from_port        = 8083
+    to_port          = 8083
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
@@ -82,10 +96,8 @@ resource "aws_security_group" "sg" {
   }
 }
 
-resource "aws_ecr_repository" "db_repo" {
-  name = "my_db"
-}
-
-resource "aws_ecr_repository" "app_repo" {
-  name = "my_app"
+# ECR Repos
+resource "aws_ecr_repository" "ecr_repos" {
+  count = length(var.ecr_repo_names)
+  name  = var.ecr_repo_names[count.index]
 }
