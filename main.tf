@@ -17,26 +17,19 @@ data "aws_ami" "latest_amazon_linux" {
 resource "aws_instance" "ec2" {
   ami                  = data.aws_ami.latest_amazon_linux.id
   subnet_id            = aws_default_subnet.default_subnet.id
-  instance_type        = "t3.micro"
+  instance_type        = "t3.medium"
   iam_instance_profile = "LabInstanceProfile"
   key_name             = aws_key_pair.key_pair.key_name
   security_groups      = [aws_security_group.sg.id]
-  user_data            = <<EOF
-  #! /bin/bash
-  sudo yum update -y
-  sudo yum install docker -y
-  sudo systemctl start docker
-  sudo systemctl enable docker
-  sudo usermod -a -G docker ec2-user
-EOF
+  #user_data            = file("init_kind.sh")
   tags = {
-    Name = "ec2_assignment1"
+    Name = "ec2_assignment2"
   }
 }
 
 # Default subnet
 resource "aws_default_subnet" "default_subnet" {
-  availability_zone = "us-east-1b"
+  availability_zone = "us-east-1a"
 }
 
 # SSH key pair 
@@ -92,7 +85,7 @@ resource "aws_security_group" "sg" {
   }
 
   tags = {
-    Name = "sg_assignment1"
+    Name = "sg_assignment2"
   }
 }
 
