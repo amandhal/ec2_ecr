@@ -21,7 +21,7 @@ resource "aws_instance" "ec2" {
   iam_instance_profile = "LabInstanceProfile"
   key_name             = aws_key_pair.key_pair.key_name
   security_groups      = [aws_security_group.sg.id]
-  user_data            = << EOF
+  user_data            = <<EOF
   #!/bin/bash
   set -ex
   sudo yum update -y
@@ -39,7 +39,7 @@ resource "aws_instance" "ec2" {
   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
   sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
   rm -f ./kubectl
-  EOF
+EOF
   tags = {
     Name = "ec2_assignment2"
   }
