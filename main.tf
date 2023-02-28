@@ -21,7 +21,25 @@ resource "aws_instance" "ec2" {
   iam_instance_profile = "LabInstanceProfile"
   key_name             = aws_key_pair.key_pair.key_name
   security_groups      = [aws_security_group.sg.id]
-  #user_data            = file("init_kind.sh")
+  user_data            = << EOF
+  #!/bin/bash
+  set -ex
+  sudo yum update -y
+  sudo yum install git -y
+  git config --global user.name "amandhal"
+  git config --global user.email "amandhal.ad@gmail.com"
+  git config --global core.editor "vim"
+  sudo yum install docker -y
+  sudo systemctl start docker
+  sudo systemctl enable docker
+  sudo usermod -a -G docker ec2-user
+  curl -sLo kind https://kind.sigs.k8s.io/dl/v0.11.0/kind-linux-amd64
+  sudo install -o root -g root -m 0755 kind /usr/local/bin/kind
+  rm -f ./kind
+  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+  rm -f ./kubectl
+  EOF
   tags = {
     Name = "ec2_assignment2"
   }
@@ -41,27 +59,18 @@ resource "aws_key_pair" "key_pair" {
 # Security Group
 resource "aws_security_group" "sg" {
   ingress {
-    description      = "8081 from everywhere"
-    from_port        = 8081
-    to_port          = 8081
+    description      = "30000 from everywhere"
+    from_port        = 30000
+    to_port          = 30000
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
 
   ingress {
-    description      = "8082 from everywhere"
-    from_port        = 8082
-    to_port          = 8082
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  ingress {
-    description      = "8083 from everywhere"
-    from_port        = 8083
-    to_port          = 8083
+    description      = "30001 from everywhere"
+    from_port        = 30001
+    to_port          = 30001
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
