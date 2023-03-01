@@ -22,23 +22,9 @@ resource "aws_instance" "ec2" {
   key_name             = aws_key_pair.key_pair.key_name
   security_groups      = [aws_security_group.sg.id]
   user_data            = <<EOF
-  #!/bin/bash
-  set -ex
+  #! /bin/bash
   sudo yum update -y
   sudo yum install git -y
-  git config --global user.name "amandhal"
-  git config --global user.email "amandhal.ad@gmail.com"
-  git config --global core.editor "vim"
-  sudo yum install docker -y
-  sudo systemctl start docker
-  sudo systemctl enable docker
-  sudo usermod -a -G docker ec2-user
-  curl -sLo kind https://kind.sigs.k8s.io/dl/v0.11.0/kind-linux-amd64
-  sudo install -o root -g root -m 0755 kind /usr/local/bin/kind
-  rm -f ./kind
-  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-  sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-  rm -f ./kubectl
 EOF
   tags = {
     Name = "ec2_assignment2"
