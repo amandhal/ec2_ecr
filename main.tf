@@ -21,7 +21,11 @@ resource "aws_instance" "ec2" {
   iam_instance_profile = "LabInstanceProfile"
   key_name             = aws_key_pair.key_pair.key_name
   security_groups      = [aws_security_group.sg.id]
-  #user_data            = file("init_kind.sh")
+  user_data            = <<EOF
+  #! /bin/bash
+  sudo yum update -y
+  sudo yum install git -y
+EOF
   tags = {
     Name = "ec2_assignment2"
   }
@@ -41,27 +45,18 @@ resource "aws_key_pair" "key_pair" {
 # Security Group
 resource "aws_security_group" "sg" {
   ingress {
-    description      = "8081 from everywhere"
-    from_port        = 8081
-    to_port          = 8081
+    description      = "30000 from everywhere"
+    from_port        = 30000
+    to_port          = 30000
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
 
   ingress {
-    description      = "8082 from everywhere"
-    from_port        = 8082
-    to_port          = 8082
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  ingress {
-    description      = "8083 from everywhere"
-    from_port        = 8083
-    to_port          = 8083
+    description      = "30001 from everywhere"
+    from_port        = 30001
+    to_port          = 30001
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
